@@ -1,11 +1,11 @@
 FROM ubuntu:latest
-
+    
 MAINTAINER jason.everling@gmail.com
-
+    
 ARG TOMCAT_VERSION
 ARG GEN_KEYS=false
 ARG TZ=America/North_Dakota/Center
-
+    
 ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
@@ -13,7 +13,9 @@ ENV TOMCAT_VERSION=$TOMCAT_VERSION
 ENV GEN_KEYS=$GEN_KEYS
 ENV VADC_IP_HEADER=X-VADC-Client
 ENV VADC_IP_ADDRESS=10.0.0.0/8\ 172.16.0.0/12\ 192.168.0.0/16
-
+    
+WORKDIR /opt/tomcat
+    
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone && \
     apt-get update && \
@@ -24,8 +26,10 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     wget \
     jq && \
     service apache2 stop && \
-    a2enmod remoteip rewrite ssl
-
+    a2enmod remoteip rewrite ssl && \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Setup Tomcat 9 + Java 11, Tomcat 10 + Java 17
 RUN TOMCAT_MAJOR=${TOMCAT_VERSION%%.*} && wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /opt/tomcat.tgz && \
     tar xzf /opt/tomcat.tgz -C /opt && \
@@ -47,11 +51,9 @@ RUN openssl req -newkey rsa:2048 -x509 -nodes -keyout /etc/ssl/server.key -new -
 # Scripts and Configs
 COPY etc/ /etc/
 COPY opt/ /opt/
-
+    
 EXPOSE 80 443
-
-WORKDIR /opt/tomcat
-
-VOLUME ["/opt/tomcat/webapps", "/var/log/tomcat", "/var/log/apache2"]
-
+    
+VOLUME ["/var/log/apache2", "/var/log/tomcat"]
+    
 ENTRYPOINT ["/opt/entrypoint.sh"]
