@@ -3,16 +3,12 @@ FROM ubuntu:latest
 MAINTAINER jason.everling@gmail.com
     
 ARG TOMCAT_VERSION
-ARG GEN_KEYS=false
 ARG TZ=America/North_Dakota/Center
     
 ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
 ENV TOMCAT_VERSION=$TOMCAT_VERSION
-ENV GEN_KEYS=$GEN_KEYS
-ENV VADC_IP_HEADER=X-VADC-Client
-ENV VADC_IP_ADDRESS=10.0.0.0/8\ 172.16.0.0/12\ 192.168.0.0/16
     
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone && \
