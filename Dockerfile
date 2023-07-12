@@ -14,8 +14,6 @@ ENV GEN_KEYS=$GEN_KEYS
 ENV VADC_IP_HEADER=X-VADC-Client
 ENV VADC_IP_ADDRESS=10.0.0.0/8\ 172.16.0.0/12\ 192.168.0.0/16
     
-WORKDIR /opt/tomcat
-    
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone && \
     apt-get update && \
@@ -56,4 +54,4 @@ EXPOSE 80 443
     
 VOLUME ["/var/log/apache2", "/var/log/tomcat"]
     
-ENTRYPOINT ["/opt/entrypoint.sh"]
+CMD ["/bin/bash"]
