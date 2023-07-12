@@ -1,0 +1,13 @@
+name: Docker CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the image
+      run: docker build --tag bshp/firefly:latest . --build-arg TOMCAT_VERSION=9.0.76
