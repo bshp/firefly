@@ -1,25 +1,21 @@
 #### App Server  
-Apps: ``/opt/tomcat/webapps/``  
-SSL: ``/etc/ssl/``  
+Designed to be run as a base image for a tomcat web application. You would design it in a way to inject your WAR    
     
-  Build:  
+You must have the below in your entrypoint
 ````
-docker build . --build-arg TOMCAT_VERSION=TOMCAT_VERSION --tag bshp/firefly:latest
+service apache2 start && $CATALINA_HOME/bin/catalina.sh run
 ````
-  Run:  
+    
+Build:  
+````
+docker build . --build-arg TOMCAT_VERSION=10.1.11 --tag YOUR_TAG
+````
+Run:  
 ````
 docker run -p 9443:443 \
     -v /var/log/apache2:/var/log/apache2 \
     -v /var/log/tomcat:/var/log/tomcat \
-    -v /opt/webapps:/opt/tomcat/webapps \
-    -e VADC_IP_ADDRESS="LOAD_BALANCE_IP_SET" \
-    -d --name firefly bshp/firefly:latest -m 2g
-````
-    
-  Maint:
-````
-docker rm -f firefly  
-docker rmi bshp/firefly:latest  
+    -d --name firefly YOUR_TAG/NAME -m 2g
 ````
     
 ##### Notes  
