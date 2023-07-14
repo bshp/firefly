@@ -36,11 +36,9 @@ RUN TOMCAT_MAJOR=${TOMCAT_VERSION%%.*} && wget --quiet --no-cookies https://dlcd
     rm /opt/tomcat.tgz && \
     rm -rf /opt/tomcat/webapps/* && \
     mkdir /var/log/tomcat && chmod -R 0777 /var/log/tomcat && \
+    openssl req -newkey rsa:2048 -x509 -nodes -keyout /etc/ssl/server.key -new -out /etc/ssl/server.pem -subj /CN=localhost -sha256 -days 3650 && \
+    openssl dhparam -out /etc/ssl/dhparams.pem 2048 && \
     echo "Installed Tomcat Version: ${TOMCAT_VERSION} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64"
-    
-# SSL Certificates
-RUN openssl req -newkey rsa:2048 -x509 -nodes -keyout /etc/ssl/server.key -new -out /etc/ssl/server.pem -subj /CN=localhost -sha256 -days 3650 && \
-    openssl dhparam -out /etc/ssl/dhparams.pem 2048
     
 # Scripts and Configs
 COPY etc/ /etc/
