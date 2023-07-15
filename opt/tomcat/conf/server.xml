@@ -39,10 +39,10 @@
                showServerInfo="false" />
         
         <Valve className="org.apache.catalina.valves.RemoteIpValve" 
-               remoteIpHeader="${vadc_ip_hdr}" 
+               remoteIpHeader="${app.vadc.ip.header}" 
                protocolHeader="x-forwarded-proto" 
                requestAttributesEnabled="true" 
-               internalProxies="${vadc_ip_regex}" />
+               internalProxies="${app.vadc.ip.regex}" />
                
         <Valve className="org.apache.catalina.valves.AccessLogValve"
                directory="/var/log/tomcat"
