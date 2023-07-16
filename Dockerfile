@@ -10,7 +10,8 @@ ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
 ENV TOMCAT_VERSION=$TOMCAT_VERSION
     
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+RUN set -eux; \
+    ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
