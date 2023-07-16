@@ -22,10 +22,9 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     service apache2 stop && \
     a2enmod remoteip rewrite ssl && \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
-    rm -rf /var/lib/apt/lists/*
-    
-# Setup Tomcat 9 + Java 11, Tomcat 10 + Java 17
-RUN TOMCAT_MAJOR=${TOMCAT_VERSION%%.*} && wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /opt/tomcat.tgz && \
+    rm -rf /var/lib/apt/lists/* && \
+    TOMCAT_MAJOR=${TOMCAT_VERSION%%.*} && \
+    wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /opt/tomcat.tgz && \
     tar xzf /opt/tomcat.tgz -C /opt && \
     mv /opt/apache-tomcat-${TOMCAT_VERSION} ${CATALINA_HOME} && \
     if [ ${TOMCAT_MAJOR} -eq 9 ];then JAVA_VERSION=11; else JAVA_VERSION=17; fi && \
@@ -35,17 +34,14 @@ RUN TOMCAT_MAJOR=${TOMCAT_VERSION%%.*} && wget --quiet --no-cookies https://dlcd
     rm /opt/java.tgz && \
     rm /opt/tomcat.tgz && \
     rm -rf /opt/tomcat/webapps/* && \
-    mkdir /var/log/tomcat && chmod -R 0777 /var/log/tomcat && \
+    mkdir /var/log/tomcat && chmod -R 0755 /var/log/tomcat && \
     openssl req -newkey rsa:2048 -x509 -nodes -keyout /etc/ssl/server.key -new -out /etc/ssl/server.pem -subj /CN=localhost -sha256 -days 3650 && \
     openssl dhparam -out /etc/ssl/dhparams.pem 2048 && \
     echo "Installed Tomcat Version: ${TOMCAT_VERSION} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64"
     
 # Scripts and Configs
-COPY etc/ /etc/
-COPY opt/ /opt/
+COPY ./src/ ./
     
 EXPOSE 80 443
-    
-VOLUME ["/var/log/apache2", "/var/log/tomcat"]
     
 CMD ["/bin/bash"]
