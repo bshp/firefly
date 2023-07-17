@@ -38,20 +38,6 @@
                showReport="false" 
                showServerInfo="false" />
         
-        <Valve className="org.apache.catalina.valves.RemoteIpValve" 
-               remoteIpHeader="${app.vadc.ip.header}" 
-               protocolHeader="x-forwarded-proto" 
-               requestAttributesEnabled="true" 
-               internalProxies="${app.vadc.ip.regex}" />
-               
-        <Valve className="org.apache.catalina.valves.AccessLogValve"
-               directory="/var/log/tomcat"
-               prefix="localhost_access_log"
-               suffix=".log"
-               renameOnRotate="true"
-               requestAttributesEnabled="true"
-               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-               
       </Host>
     </Engine>
   </Service>

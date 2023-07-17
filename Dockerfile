@@ -21,7 +21,7 @@ RUN set -eux; \
     wget \
     jq && \
     service apache2 stop && \
-    a2enmod remoteip rewrite ssl && \
+    a2enmod rewrite ssl && \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
     rm -rf /var/lib/apt/lists/* && \
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. | with_entries(select(.key | startswith($TOMCAT_VERSION))) | .[].version') && \
