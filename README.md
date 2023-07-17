@@ -8,7 +8,7 @@ Tomcat/JDK: Latest versions for Tomcat and Corretto
     
 You must have the below in your entrypoint
 ````
-service apache2 start && $CATALINA_HOME/bin/catalina.sh run
+service apache2 restart && $CATALINA_HOME/bin/catalina.sh run
 ````
 Tags:
     
@@ -17,14 +17,29 @@ v10.17 = Tomcat 10 with Corretto JDK 17
     
 Build:  
 ````
-docker build . --build-arg TOMCAT_VERSION=10.1.11 --tag YOUR_TAG
-````
-Run:  
-````
-docker run -p 9443:443 \
-    -v /var/log/apache2:/var/log/apache2 \
-    -v /var/log/tomcat:/var/log/tomcat \
-    -d --name firefly YOUR_TAG/NAME -m 2g
+docker build . --build-arg TOMCAT_VERSION=10 --tag YOUR_TAG
 ````
     
 ##### Notes  
+SSL Certs:  
+    
+Modify your entrypoint to add or generate new keys  
+    
+CA Certs Update:  
+    
+Within your entrypoint script you could do something like the below to inject your ca certs,
+````
+echo "CA Certificates: Checking for CA Import"
+if [[ ! -z "${CA_URL}" ]];then
+    echo "CA Certificates: The following URL will be searched ${CA_URL}"
+    cd /usr/local/share/ca-certificates
+    wget -r -nH -A *_CA.crt ${CA_URL}
+    for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
+        CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | sed -n 's/ *commonName *= //p')
+        ${JAVA_HOME}/bin/keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 | echo "CA Certificates: Added certificate to cacert, $CA_CRT"
+    done
+    update-ca-certificates
+else 
+    echo "CA Certificates: Nothing to import, CA_URL is not defined"
+fi
+````
