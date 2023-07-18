@@ -9,5 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build the image
+    - name: Build the v9 image
       run: docker build --tag bshp/firefly:latest . --build-arg TOMCAT_VERSION=9 --progress=plain
+    - name: Build the v10 image
+      run: docker build --tag bshp/firefly:v10.17 . --build-arg TOMCAT_VERSION=10 --progress=plain
