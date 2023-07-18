@@ -27,8 +27,10 @@ RUN set -eux; \
     tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME}; \
     if [ ${TOMCAT_VERSION} -le 9 ];then \
         JAVA_VERSION=11; \
+        export TOMCAT_BUILD_PARAM="--with-ssl"; \
     else \
         JAVA_VERSION=17; \
+        export TOMCAT_BUILD_PARAM=""; \
     fi; \
     wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz; \
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME}; \
@@ -58,7 +60,13 @@ RUN set -eux; \
         cd "$buildDir/native"; \
         osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
         aprConfig="$(command -v apr-1-config)"; \
-        ./configure --build="$osArch" --libdir="${TOMCAT_NATIVE_LIBDIR}" --prefix="${CATALINA_HOME}" --with-apr="${aprConfig}" --with-java-home="${JAVA_HOME}" --with-ssl; \
+        ./configure \
+            --build="$osArch" \
+            --libdir="${TOMCAT_NATIVE_LIBDIR}" \
+            --prefix="${CATALINA_HOME}" \
+            --with-apr="${aprConfig}" \
+            --with-java-home="${JAVA_HOME}" \
+            "$([ ${TOMCAT_VERSION} -le 9 ] && echo '--with-ssl' || echo '')"; \
         nproc="$(nproc)"; \
         make -j "$nproc"; \
         make install; \
