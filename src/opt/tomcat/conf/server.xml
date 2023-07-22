@@ -19,7 +19,6 @@
                allowTrace="false" />
                
     <Engine name="Catalina" defaultHost="localhost">
-    
         <Host name="localhost" 
             appBase="webapps"
             unpackWARs="true" 
@@ -28,6 +27,9 @@
             <Valve className="org.apache.catalina.valves.ErrorReportValve" 
                 showReport="false" 
                 showServerInfo="false" />
+            <!-- Entrypoint Placeholder -->
+            
+            <!-- Entrypoint Placeholder -->
             
       </Host>
     </Engine>
