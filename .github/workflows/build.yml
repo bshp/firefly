@@ -19,10 +19,10 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_TOKEN
     - name: Build v8
-      run: docker build --tag bshp/firefly:v8.9 . --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=8 --progress=plain
+      run: docker build --tag bshp/firefly:v9.8 . --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=8 --progress=plain
     - name: Push v8
       run: |
-        docker push bshp/firefly:v8.9
+        docker push bshp/firefly:v9.8
     - name: Build v9
       run: docker build --tag bshp/firefly:latest . --build-arg TOMCAT_VERSION=9 --progress=plain
     - name: Push v9
