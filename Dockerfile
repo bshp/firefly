@@ -3,6 +3,7 @@ FROM bshp/apache2:latest
 MAINTAINER jason.everling@gmail.com
     
 ARG TOMCAT_VERSION
+ARG JAVA_VERSION
     
 ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
@@ -23,7 +24,11 @@ RUN set -eux; \
     wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz; \
     tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME}; \
     if [ ${TOMCAT_VERSION} -le 9 ];then \
-        JAVA_VERSION=11; \
+        if [ ! -z "${JAVA_VERSION}" ];then \
+            JAVA_VERSION=${JAVA_VERSION}; \
+        else \
+            JAVA_VERSION=11; \
+        fi \
     else \
         JAVA_VERSION=17; \
     fi; \
