@@ -1,9 +1,8 @@
-FROM ubuntu:latest
+FROM bshp/apache2:latest
     
 MAINTAINER jason.everling@gmail.com
     
 ARG TOMCAT_VERSION
-ARG TZ=America/North_Dakota/Center
     
 ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
@@ -14,11 +13,9 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
 # Initial Setup for httpd, tomcat, and java
 RUN set -eux; \
-    installPkgs='apache2 ca-certificates libapache2-mod-jk wget jq'; \
-    ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone; \
+    installPkgs='libapache2-mod-jk'; \
     apt-get update; \
     apt-get install -y --no-install-recommends $installPkgs; \
-    service apache2 stop && a2enmod rewrite ssl; \
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - \
             | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. \
             | with_entries(select(.key | startswith($TOMCAT_VERSION))) \
@@ -34,8 +31,6 @@ RUN set -eux; \
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME}; \
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*; \
     mkdir /var/log/tomcat && chmod -R 0755 /var/log/tomcat; \
-    openssl req -newkey rsa:2048 -x509 -nodes -keyout /etc/ssl/server.key -new -out /etc/ssl/server.pem -subj /CN=localhost -sha256 -days 3650; \
-    openssl dhparam -out /etc/ssl/dhparams.pem 2048; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     # Ensure apache2 can start
     apache2Test=$(apachectl configtest 2>&1); \
