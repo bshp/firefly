@@ -9,8 +9,8 @@ ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
 ENV TOMCAT_VERSION=$TOMCAT_VERSION
-#ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
-#ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
+ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
 # Initial Setup for httpd, tomcat, and java
 RUN set -eux; \
@@ -45,6 +45,51 @@ RUN set -eux; \
         exit 1; \
     fi; \
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
+
+# Build Tomcat Native Library
+RUN set -eux; \
+    echo "Attempting to build Tomcat Native Library"; \
+    saveAptManual="$(apt-mark showmanual)"; \
+    buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make'; \
+    buildDir="$(mktemp -d)"; \
+    tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1; \
+    apt-get install -y --no-install-recommends $buildDeps; \
+    ( \
+        cd "$buildDir/native"; \
+        osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+        aprConfig="$(command -v apr-1-config)"; \
+        ./configure \
+            --build="$osArch" \
+            --libdir="${TOMCAT_NATIVE_LIBDIR}" \
+            --prefix="${CATALINA_HOME}" \
+            --with-apr="${aprConfig}" \
+            --with-java-home="${JAVA_HOME}" \
+            "$([ ${TOMCAT_VERSION} -le 9 ] && echo '--with-ssl' || echo '')"; \
+        nproc="$(nproc)"; \
+        make -j "$nproc"; \
+        make install; \
+    ); \
+    rm -rf "$buildDir"; \
+    apt-mark auto '.*' > /dev/null; \
+    [ -z "$saveAptManual" ] || apt-mark manual $saveAptManual > /dev/null; \
+    find "$TOMCAT_NATIVE_LIBDIR" -type f -executable -exec ldd '{}' ';' \
+        | awk '/=>/ { print $(NF-1) }' \
+        | xargs -rt readlink -e \
+        | sort -u \
+        | xargs -rt dpkg-query --search \
+        | cut -d: -f1 \
+        | sort -u \
+        | tee "$TOMCAT_NATIVE_LIBDIR/.dependencies.txt" \
+        | xargs -r apt-mark manual; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    rm -rf /var/lib/apt/lists/*; \
+    tomcatTest="$(/opt/tomcat/bin/catalina.sh configtest  2>&1)"; \
+    tomcatNative="$(echo "$tomcatTest" | grep 'Apache Tomcat Native')"; \
+    tomcatNative="$(echo "$tomcatNative" | sort -u)"; \
+    if ! echo "$tomcatNative" | grep -E 'INFO: Loaded( APR based)? Apache Tomcat Native library' >&2; then \
+        echo >&2 "$tomcatTest"; \
+        exit 1; \
+    fi;
     
 # Scripts and Configs
 COPY ./src/ ./
