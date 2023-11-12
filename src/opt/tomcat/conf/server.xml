@@ -27,9 +27,12 @@
             <Valve className="org.apache.catalina.valves.ErrorReportValve" 
                 showReport="false" 
                 showServerInfo="false" />
-            <!-- Entrypoint Placeholder -->
             
-            <!-- Entrypoint Placeholder -->
+            <Valve className="org.apache.catalina.valves.RemoteIpValve" 
+                protocolHeader="x-forwarded-proto" 
+                requestAttributesEnabled="true" 
+                remoteIpHeader="${VADC_IP_HEADER:default-value}" 
+                internalProxies="${VADC_IP_REG}" />
             
       </Host>
     </Engine>
