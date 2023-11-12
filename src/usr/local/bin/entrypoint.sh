@@ -31,8 +31,8 @@ EOF
 );
 echo $CATALINA_PARAMS > /opt/tomcat/bin/setenv.sh && chmod -R 0755 /opt/tomcat/bin/setenv.sh
 echo "Tomcat: Finished configuring startup params"
-    
 echo "Initialization complete, attempting to start container"
     
 # Start Services
-service apache2 restart && $CATALINA_HOME/bin/catalina.sh run
+service apache2 restart
+su -c "$CATALINA_HOME/bin/catalina.sh run" tomcat

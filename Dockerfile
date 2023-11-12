@@ -93,6 +93,10 @@ RUN set -eux; \
     
 # Scripts and Configs
 COPY --chown=root:root --chmod=755 ./src/ ./
+
+RUN set -eux; \
+    useradd -m -u 1080 tomcat; \
+    chown -R root:tomcat $CATALINA_HOME && chmod -R 0775 $CATALINA_HOME;
     
 EXPOSE 80 443
     
