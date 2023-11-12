@@ -92,11 +92,7 @@ RUN set -eux; \
     fi;
     
 # Scripts and Configs
-COPY ./src/ ./
-
-RUN set eux; \
-    chown -R root:root /usr/local/bin; \
-    chmod -R a+x /usr/local/bin;
+COPY --chown=root:root --chmod=755 ./src/ ./
     
 EXPOSE 80 443
     
