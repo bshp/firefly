@@ -93,6 +93,10 @@ RUN set -eux; \
     
 # Scripts and Configs
 COPY ./src/ ./
+
+RUN set eux; \
+    chown -R root:root /usr/local/bin; \
+    chmod -R a+x /usr/local/bin;
     
 EXPOSE 80 443
     
