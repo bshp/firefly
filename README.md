@@ -23,7 +23,7 @@ VADC_IP_HEADER = client ip header name, e.g X-Client-IP , default: X-Forwarded-F
 ````
 Tags:
     
-latest = v9.11
+latest = v9.11    
 v9.11 = Tomcat 9 with Corretto JDK 11    
 v10.17 = Tomcat 10 with Corretto JDK 17    
     
