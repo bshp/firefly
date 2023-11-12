@@ -96,4 +96,4 @@ COPY --chown=root:root --chmod=755 ./src/ ./
     
 EXPOSE 80 443
     
-CMD ["/bin/bash"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
