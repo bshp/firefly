@@ -24,21 +24,35 @@ fi
 
 echo "CA Certificates: Checking for CA Import"
 if [ "${URL}" != "none" ];then
-    echo "CA Certificates: The following URL will be searched ${URL}";
+    IS_URL='^(http|https)';
+    echo "CA Certificates: The following location will be searched ${URL}";
     cd /usr/local/share/ca-certificates;
-    wget -r -nH -A *_CA.crt ${URL};
-    for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
-        CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | sed -n 's/ *commonName *= //p');
-        CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
-        if [ "$CA_EXISTS" -eq 0 ];then
-            ${JAVA_HOME}/bin/keytool -import -trustcacerts -cacerts \
-                -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
-                | echo "CA Certificates: Added certificate to cacert, $CA_CRT"
+    if [[ ${URL} =~ ${IS_URL} ]];then
+        wget -r -nH -A *_CA.crt ${URL};
+    else
+        if [[ ! -d ${URL} ]];then
+            echo "CA Certificates: ${URL} does not exist, nothing to import";
         else 
-            echo "CA Certificates: Certificate ${CA_NAME} already exists, not adding";
-        fi;
-    done;
-    update-ca-certificates;
+            cp -R ${URL} /usr/local/share/ca-certificates/;
+        fi
+    fi
+    HAS_CRTS=$(ls /usr/local/share/ca-certificates/*.crt 2> /dev/null | wc -l);
+    if [[ "${HAS_CRTS}" -ne 0 ]];then
+        for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
+            CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | sed -n 's/ *commonName *= //p');
+            CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
+            if [ "$CA_EXISTS" -eq 0 ];then
+                ${JAVA_HOME}/bin/keytool -import -trustcacerts -cacerts \
+                    -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
+                    | echo "CA Certificates: Added certificate to cacert, $CA_CRT"
+            else 
+                echo "CA Certificates: Certificate ${CA_NAME} already exists, not adding";
+            fi;
+        done;
+        update-ca-certificates;
+    else
+        echo "CA Certificates: Could not find any certificates to import, ensure your certificates have the .crt extension";
+    fi
     rm -rf /usr/local/share/ca-certificates/*;
 else 
     echo "CA Certificates: Nothing to import, CA_URL is not defined"
