@@ -35,7 +35,6 @@ RUN set -eux; \
     wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz; \
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME}; \
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*; \
-    mkdir /var/log/tomcat && chmod -R 0755 /var/log/tomcat; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     # Ensure apache2 can start
     apache2Test=$(apachectl configtest 2>&1); \
@@ -43,6 +42,10 @@ RUN set -eux; \
     if [ -z "$apache2Starts" ];then \
         echo "Apache2 config test failed: $apache2Test"; \
         exit 1; \
+    fi; \
+    if [ ${TOMCAT_VERSION} -lt 9 ];then \
+        echo "Tomcat ${TOMCAT_LATEST} will reach end of life on 31 March 2024, bugs and security vulnerabilities will no longer be addressed"; \
+        echo "Consider changing your tag to v9.11 or v10.17"; \
     fi; \
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
 
@@ -93,7 +96,7 @@ RUN set -eux; \
     
 # Scripts and Configs
 COPY --chown=root:root --chmod=755 ./src/ ./
-
+    
 RUN set -eux; \
     useradd -m -u 1080 tomcat; \
     chown -R root:tomcat $CATALINA_HOME && chmod -R 0775 $CATALINA_HOME;
