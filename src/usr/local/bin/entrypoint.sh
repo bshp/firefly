@@ -32,4 +32,5 @@ echo "Initialization complete, attempting to start container as: [Apache: www-da
     
 # Start Services:
 a2enmod remoteip && service apache2 restart
-su -c "$CATALINA_HOME/bin/catalina.sh run" tomcat
+#su -c "$CATALINA_HOME/bin/catalina.sh run" tomcat
+$CATALINA_HOME/bin/catalina.sh run
