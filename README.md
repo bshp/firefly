@@ -11,13 +11,14 @@ Environment Variables:
 Required:    
 ````
 APP_NAME = name of the app, e.g myapp.war would be myapp
-APP_PARAMS = Java/Tomcat additional params
 UPDATE_PATH = Path to where the app war is located, without the trailing slash, e.g /opt/updates
 ````
     
 Optional:    
 ````
-CA_URL = URL to the CA Certificates to import into os/java trust store
+APP_DATA = the path of where the application can store data, e.g /opt/myapp, default: /etc/${APP_NAME}
+APP_PARAMS = additional params to append to JAVA_OPTS, e.g -Dmyapp.setting=something
+CA_URL = URL or PATH to where CA Certificates can be found, they must have the .crt extension, if valid, will be imported into the OS and Java stores
 VADC_IP_ADDRESS = address of load balancer, space seperated, e.g 192.168.100.105 192.168.0.105, default: any
 VADC_IP_HEADER = client ip header name, e.g X-Client-IP , default: X-Forwarded-For
 ````
