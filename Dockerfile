@@ -5,6 +5,10 @@ MAINTAINER jason.everling@gmail.com
 ARG TOMCAT_VERSION
 ARG JAVA_VERSION=0
 
+ENV APP_TYPE="tomcat"
+ENV REWRITE_CORS=0
+ENV REWRITE_DEFAULT=1
+ENV REWRITE_SKIP=0
 ENV JAVA_HOME=/opt/java
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
@@ -14,9 +18,6 @@ ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
 # Initial Setup for httpd, tomcat, and java
 RUN set -eux; \
-    installPkgs='libapache2-mod-jk'; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends $installPkgs; \
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - \
             | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. \
             | with_entries(select(.key | startswith($TOMCAT_VERSION))) \

@@ -1,7 +1,0 @@
-LoadModule jk_module /usr/lib/apache2/modules/mod_jk.so
-JkWorkersFile /etc/libapache2-mod-jk/workers.properties
-JkLogFile /var/log/apache2/mod_jk.log
-JkShmFile /var/log/apache2/jk-runtime-status
-JkLogLevel error
-
-JkMount /* ajp13_worker
