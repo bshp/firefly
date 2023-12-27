@@ -1,11 +1,7 @@
 #!/bin/bash
     
-## Certificates ##
-if [ "${CERT_PATH}" != "" ];then
-    /usr/local/bin/cert-updater;
-fi
-    
 ## Initialization ##
+/usr/local/bin/cert-updater;
 /usr/local/bin/app-config;
 /usr/local/bin/app-updater;
     

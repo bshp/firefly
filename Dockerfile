@@ -1,6 +1,6 @@
 FROM bshp/apache2:latest
     
-MAINTAINER jason.everling@gmail.com
+LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
     
 ARG TOMCAT_VERSION
 ARG JAVA_VERSION=0
