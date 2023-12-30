@@ -1,11 +1,19 @@
 ## Application Server  
 Designed for a tomcat web application
     
-Using AJP (mod_jk) for performance reasons, no listeners for http, only AJP on 127.0.0.1 for apache2 access. Both apache2 and tomcat have a subset of standard security practices applied. You can view the configs in the /etc/apache2 and /opt/tomcat of the repo.
+Using AJP (mod_jk) for performance reasons, no listeners for http, only AJP on 127.0.0.1 for apache2 access. Both apache2 and tomcat have a subset of standard security practices applied. You can view the configs in the /etc/apache2 of the base image below and /opt/tomcat of this repo.
     
-Base OS: Ubuntu Server LTS - Latest    
-Tomcat/JDK: Latest versions for Tomcat and Corretto    
+#### Base OS:    
+Ubuntu Server LTS - Latest
     
+#### Packages:    
+Updated weekly from the official upstream Ubuntu LTS, see [Apache2 Base](https://github.com/bshp/apache2) for packages added.
+    
+Corretto (JDK) and Tomcat are also updated weekly using the latest version of the branch, e.g tomcat 10.x and corretto 17.x
+````
+corretto - https://corretto.aws/downloads/latest
+tomcat - https://dlcdn.apache.org/tomcat
+````
 ## Environment Variables:
     
 see [Base Image](https://github.com/bshp/apache2/blob/master/Dockerfile) for more variables
@@ -30,7 +38,35 @@ VADC_IP_HEADER = client ip header name, e.g X-Client-IP , default: X-Forwarded-F
 ````
     
 #### Note:    
-Some variables do not need to be set, the app-config and app-updater will change runas and directory permissions based on application type, see [Base Scripts](https://github.com/bshp/apache2/tree/master/src/usr/local/bin) for more info
+Some need to be set for certain functions when used direct with app-run, see [Base Scripts](https://github.com/bshp/apache2/tree/master/src/usr/local/bin) for more info    
+#### Direct:  
+````
+docker run \
+    -e APP_PARAMS=-Xmx2048m \
+    -e CERT_PATH=https://cert.example.com/ \
+    -e CERT_SUBJECT="localhost" \
+    -e CERT_FILTER="*_CA.crt" \
+    -e APP_NAME=myapp \
+    -e APP_DATA=/etc/myapp \
+    -e APP_UPDATE_PATH=/opt/updates \
+    -e APP_UPDATE_AUTO=1 \
+    -e CERT_AUTO_UPDATE=1 \
+    -e REWRITE_CORS=0 \
+    -e REWRITE_DEFAULT=1 \
+    -e REWRITE_SKIP=0 \
+    -e VADC_IP_ADDRESS=192.168.100.10 \
+    -e VADC_IP_HEADER=X-VADC-Client \
+    -d bshp/firefly:v10.17
+````
+#### Custom:  
+Add at end of your entrypoint script either of:  
+````
+/usr/local/bin/app-run;
+````
+````
+/usr/sbin/apachectl -k start;
+su tomcat -c "${CATALINA_HOME}/bin/catalina.sh run";
+````
     
 ## Tags:
     

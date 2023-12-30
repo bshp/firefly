@@ -6,6 +6,8 @@ ARG TOMCAT_VERSION
 ARG JAVA_VERSION=0
 
 ENV APP_TYPE="tomcat"
+ENV ENABLE_CORS=0
+ENV ENABLE_XFRAME=0
 ENV REWRITE_CORS=0
 ENV REWRITE_DEFAULT=1
 ENV REWRITE_SKIP=0
@@ -100,8 +102,9 @@ COPY --chown=root:root --chmod=755 ./src/ ./
     
 RUN set -eux; \
     useradd -m -u 1080 tomcat; \
-    chown -R root:tomcat $CATALINA_HOME && chmod -R 0775 $CATALINA_HOME;
+    chown -R root:tomcat $CATALINA_HOME; \
+    chmod -R 0775 $CATALINA_HOME;
     
 EXPOSE 80 443
     
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/app-run"]
