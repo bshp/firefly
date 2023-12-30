@@ -56,6 +56,44 @@
         <url-pattern>*.jspx</url-pattern>
     </servlet-mapping>
     
+    <!-- X-Frame-Options Filter, to activate, set $ENABLE_XFRAME=1 -->
+    
+    <!-- #X_FRAME_BEGIN
+    <filter>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <filter-class>org.apache.catalina.filters.HttpHeaderSecurityFilter</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>antiClickJackingOption</param-name>
+            <param-value>SAMEORIGIN</param-value>
+        </init-param>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    #X_FRAME_END -->
+    
+    <!-- CORS Filter, to activate, set $ENABLE_CORS=1 -->
+    
+    <!-- #CORS_BEGIN
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.methods</param-name>
+            <param-value>GET,POST,HEAD</param-value>
+        </init-param>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    #CORS_END -->
+    
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
