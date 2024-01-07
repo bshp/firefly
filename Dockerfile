@@ -59,7 +59,7 @@ RUN set -eux; \
     buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make'; \
     buildDir="$(mktemp -d)"; \
     tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1; \
-    apt-get install -y --no-install-recommends $buildDeps; \
+    apt-get update && apt-get install -y --no-install-recommends $buildDeps; \
     ( \
         cd "$buildDir/native"; \
         osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
