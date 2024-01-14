@@ -11,27 +11,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Configure Docker
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_TOKEN
-    - name: Build v8
+    - name: Build v9.8
       run: docker build . --pull --tag bshp/firefly:v9.8 --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=8 --progress=plain --no-cache
-    - name: Push v8
+    - name: Push v9.8
       run: |
         docker push bshp/firefly:v9.8
-    - name: Build v9
+    - name: Build v9.11
       run: docker build . --pull --tag bshp/firefly:latest --build-arg TOMCAT_VERSION=9 --progress=plain --no-cache
-    - name: Push v9
+    - name: Push v9.11
       run: |
         docker tag bshp/firefly:latest bshp/firefly:v9.11
         docker push bshp/firefly:latest
         docker push bshp/firefly:v9.11
-    - name: Build v10
+    - name: Build v10.17
       run: docker build . --pull --tag bshp/firefly:v10.17 --build-arg TOMCAT_VERSION=10 --progress=plain --no-cache
-    - name: Push v10
+    - name: Push v10.17
       run: |
         docker push bshp/firefly:v10.17
+    - name: Build v10.21
+      run: docker build . --pull --tag bshp/firefly:v10.21 --build-arg JAVA_VERSION=21 --build-arg TOMCAT_VERSION=10 --progress=plain --no-cache
+    - name: Push v10.21
+      run: |
+        docker push bshp/firefly:v10.21
