@@ -1,5 +1,6 @@
 name: Docker CI
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths-ignore:
@@ -19,19 +20,19 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_TOKEN
     - name: Build v8
-      run: docker build . --pull --tag bshp/firefly:v9.8 --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=8 --progress=plain --no-cache
+      run: docker build . --pull --tag bshp/firefly:v9.8 --build-arg VERSION=22.04 --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=8 --no-cache
     - name: Push v8
       run: |
         docker push bshp/firefly:v9.8
     - name: Build v9
-      run: docker build . --pull --tag bshp/firefly:latest --build-arg TOMCAT_VERSION=9 --progress=plain --no-cache
+      run: docker build . --pull --tag bshp/firefly:latest --build-arg VERSION=22.04 --build-arg TOMCAT_VERSION=9 --no-cache
     - name: Push v9
       run: |
         docker tag bshp/firefly:latest bshp/firefly:v9.11
         docker push bshp/firefly:latest
         docker push bshp/firefly:v9.11
     - name: Build v10
-      run: docker build . --pull --tag bshp/firefly:v10.17 --build-arg TOMCAT_VERSION=10 --progress=plain --no-cache
+      run: docker build . --pull --tag bshp/firefly:v10.17 --build-arg VERSION=22.04 --build-arg TOMCAT_VERSION=10 --no-cache
     - name: Push v10
       run: |
         docker push bshp/firefly:v10.17

@@ -28,11 +28,11 @@ APP_UPDATE_PATH = Path to where the app war is located, without the trailing sla
 ````
 APP_DATA = the path of where the application can store data, e.g /opt/myapp, default: /etc/${APP_NAME}
 APP_PARAMS = additional params to append to JAVA_OPTS, e.g -Dmyapp.setting=something
-CERT_SUBJECT = the subject for the server ssl keys, e.g "localhost"
-CERT_FILTER = the filter for certificate import, e.g "*_CA.crt"
+CA_FILTER = the filter for certificate import, e.g "*_CA.crt"
+CA_PATH = URL or PATH to where CA Certificates can be found, prefixed with file: or url: , e.g url:https://www.example.com/ or file:/opt/certs
+CA_AUTO_UPDATE = 1 (Import CERT_PATH certs into the OS and Java stores)
 CERT_UPDATE_KEYS = 0 to not update, 1 to force update
-CERT_PATH = URL or PATH to where CA Certificates can be found
-CERT_AUTO_UPDATE = 1 (Import CERT_PATH certs into the OS and Java stores)
+CERT_SUBJECT = the subject for the server ssl keys, e.g "localhost"
 VADC_IP_ADDRESS = address of load balancer, space seperated, e.g 192.168.100.105 192.168.0.105, default: any
 VADC_IP_HEADER = client ip header name, e.g X-Client-IP , default: X-Forwarded-For
 ````
@@ -43,14 +43,14 @@ Some need to be set for certain functions when used direct with app-run, see [Ba
 ````
 docker run \
     -e APP_PARAMS=-Xmx2048m \
-    -e CERT_PATH=https://cert.example.com/ \
+    -e CA_AUTO_UPDATE=1 \
+    -e CA_PATH=url:https://cert.example.com/ \
+    -e CA_FILTER="*_CA.crt" \
     -e CERT_SUBJECT="localhost" \
-    -e CERT_FILTER="*_CA.crt" \
     -e APP_NAME=myapp \
     -e APP_DATA=/etc/myapp \
     -e APP_UPDATE_PATH=/opt/updates \
     -e APP_UPDATE_AUTO=1 \
-    -e CERT_AUTO_UPDATE=1 \
     -e REWRITE_CORS=0 \
     -e REWRITE_DEFAULT=1 \
     -e REWRITE_SKIP=0 \
@@ -61,7 +61,7 @@ docker run \
 #### Custom:  
 Add at end of your entrypoint script either of:  
 ````
-/usr/local/bin/app-run;
+/usr/local/bin/ociectl --run;
 ````
 ````
 /usr/sbin/apachectl -k start;
@@ -76,6 +76,6 @@ v10.17 = Tomcat 10 with Corretto JDK 17
     
 ## Build:  
 ````
-docker build . --build-arg TOMCAT_VERSION=10 --tag YOUR_TAG
+docker build . --build-arg VERSION=22.04 --build-arg TOMCAT_VERSION=10 --tag YOUR_TAG
 ````
     

@@ -1,10 +1,21 @@
-FROM bshp/apache2:latest
+# bshp/apache2:version_tag, e.g 22.04 unquoted
+ARG VERSION
+    
+# Tomcat/Java
+ARG TOMCAT_VERSION
+ARG JAVA_VERSION=0
+    
+# Optional: Change Timezone
+ARG TZ=America/North_Dakota/Center
+    
+FROM bshp/apache2:${VERSION}
     
 LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
     
+ARG TZ
 ARG TOMCAT_VERSION
-ARG JAVA_VERSION=0
-
+ARG JAVA_VERSION
+    
 ENV APP_TYPE="tomcat"
 ENV ENABLE_CORS=0
 ENV ENABLE_XFRAME=0
@@ -19,7 +30,7 @@ ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
 # Initial Setup for httpd, tomcat, and java
-RUN set -eux; \
+RUN set -eu; \
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - \
             | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. \
             | with_entries(select(.key | startswith($TOMCAT_VERSION))) \
@@ -38,7 +49,6 @@ RUN set -eux; \
     wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz; \
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME}; \
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     # Ensure apache2 can start
     apache2Test=$(apachectl configtest 2>&1); \
     apache2Starts=$(echo "$apache2Test" | grep 'Syntax OK'); \
@@ -53,7 +63,7 @@ RUN set -eux; \
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
 
 # Build Tomcat Native Library
-RUN set -eux; \
+RUN set -eu; \
     echo "Attempting to build Tomcat Native Library"; \
     saveAptManual="$(apt-mark showmanual)"; \
     buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make'; \
@@ -100,11 +110,11 @@ RUN set -eux; \
 # Scripts and Configs
 COPY --chown=root:root --chmod=755 ./src/ ./
     
-RUN set -eux; \
+RUN set -eu; \
     useradd -m -u 1080 tomcat; \
     chown -R root:tomcat $CATALINA_HOME; \
     chmod -R 0775 $CATALINA_HOME;
     
 EXPOSE 80 443
     
-ENTRYPOINT ["/usr/local/bin/app-run"]
+ENTRYPOINT ["/usr/local/bin/ociectl", "--run"]
