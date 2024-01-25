@@ -1,0 +1,47 @@
+#!/bin/bash
+    
+function app_shutdown()
+{
+    /usr/sbin/apachectl -k stop;
+    ${CATALINA_HOME}/bin/catalina.sh stop;
+}
+    
+function app_reload()
+{
+
+    app_shutdown;
+    app_start;
+}
+    
+function app_start()
+{
+   /usr/sbin/apachectl -k start;
+   su ${APP_RUNAS} -c "${CATALINA_HOME}/bin/catalina.sh run";
+}
+    
+function app_certs()
+{
+    ${OCIE_HOME}/scripts/cacerts;
+}
+    
+function app_config()
+{
+    ${OCIE_HOME}/scripts/config;
+}
+    
+function app_update()
+{
+    ${OCIE_HOME}/scripts/update;
+}
+    
+function app_test()
+{
+    CFG_TEST=$("${CATALINA_HOME}/bin/catalina.sh" configtest 2>&1);
+    CFG_PASS="INFO: Server initialization in";
+    CFG_RESULT=$(echo "$CFG_TEST" | grep "$CFG_PASS");
+    if [[ -z "$CFG_RESULT" ]];then
+        echo "$CFG_RESULT";
+    else 
+        echo "true";
+    fi;
+}
