@@ -32,7 +32,6 @@ ENV TOMCAT_VERSION=$TOMCAT_VERSION
 ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
-SHELL ["/bin/bash", "-c"]
 # Initial Setup for httpd, tomcat, and java
 RUN <<-EOD
     #!/usr/bin/env bash
@@ -44,8 +43,8 @@ RUN <<-EOD
     wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz;
     tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME};
     # Get Java Distribution
-    if [[ "${JAVA_VERSION}" -eq 0 ]];then
-        if [[ "${TOMCAT_VERSION}" -le 9 ]];then
+    if [ ${JAVA_VERSION} -eq 0 ];then
+        if [ ${TOMCAT_VERSION} -le 9 ];then
             JAVA_VERSION=11;
         else
             JAVA_VERSION=17;
