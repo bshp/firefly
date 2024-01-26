@@ -11,6 +11,8 @@ ARG TZ=America/North_Dakota/Center
 FROM bshp/apache2:${VERSION}
     
 LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
+LABEL org.opencontainers.image.source="https://github.com/bshp/firefly"
+LABEL org.opencontainers.image.title="Firefly"
     
 ARG TZ
 ARG TOMCAT_VERSION
@@ -19,7 +21,7 @@ ARG JAVA_VERSION
 ENV APP_TYPE="tomcat"
 ENV ENABLE_CORS=0
 ENV ENABLE_XFRAME=0
-ENV OCIE_TYPES=${OCIE_TYPES}:/opt/ocie/type
+ENV OCIE_TYPES=${OCIE_TYPES}:/opt
 ENV REWRITE_CORS=0
 ENV REWRITE_DEFAULT=1
 ENV REWRITE_SKIP=0
