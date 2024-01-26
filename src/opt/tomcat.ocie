@@ -36,11 +36,11 @@ function app_update()
     
 function app_test()
 {
-    CFG_TEST=$(/opt/tomcat/bin/catalina.sh configtest 2>&1);
-    CFG_TEST=$(echo "$CFG_TEST" | grep 'Apache Tomcat Native' | sort -u);
+    TC_TEST=$(/opt/tomcat/bin/catalina.sh configtest 2>&1);
+    CFG_TEST=$(echo "$TC_TEST" | grep 'Apache Tomcat Native' | sort -u);
     CFG_PASS='INFO: Loaded( APR based)? Apache Tomcat Native library';
     CFG_RESULT=$(echo "$CFG_TEST" | grep -E "$CFG_PASS");
     if [[ -z "$CFG_RESULT" ]];then
-        echo "$CFG_TEST";
+        echo "$TC_TEST";
     fi;
 }

@@ -33,23 +33,23 @@ ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
 # Initial Setup for httpd, tomcat, and java
-RUN <<-EOD
-    #!/usr/bin/env bash
+RUN <<"EOD" bash
     set -eu;
     useradd -m -u 1080 tomcat;
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - \
         | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. | with_entries(select(.key | startswith($TOMCAT_VERSION))) | .[].version');
-    # Get Tomcat Distribution
+    echo "Getting Tomcat Distribution, Version: ${TOMCAT_LATEST}";
     wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz;
     tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME};
-    # Get Java Distribution
-    if [ ${JAVA_VERSION} -eq 0 ];then
-        if [ ${TOMCAT_VERSION} -le 9 ];then
+    if [[ ${JAVA_VERSION} -eq 0 ]];then
+        echo "OpenJDK build-arg was omitted";
+        if [[ ${TOMCAT_VERSION} -le 9 ]];then
             JAVA_VERSION=11;
         else
             JAVA_VERSION=17;
         fi;
     fi;
+    echo "Getting OpenJDK Distribution, Version: ${JAVA_VERSION}.x";
     wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz;
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME};
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*;
@@ -65,15 +65,15 @@ RUN <<-EOD
 EOD
     
 # Build Tomcat Native Library
-RUN <<-EOD
-    #!/usr/bin/env bash
+RUN <<"EOD" bash
     set -eu;
     echo "Attempting to build Tomcat Native Library";
     saveAptManual="$(apt-mark showmanual)";
     buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make';
     buildDir="$(mktemp -d)";
     tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1;
-    apt-get update && apt-get install -y --no-install-recommends $buildDeps;
+    echo "Installing build dependencies for Tomcat Native";
+    apt-get -qq update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends $buildDeps >/dev/null 2>&1;
     (
         cd "$buildDir/native";
         osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)";
@@ -83,34 +83,32 @@ RUN <<-EOD
         nproc="$(nproc)";
         make -j "$nproc";
         make install;
-    );
+    ) >/dev/null 2>&1;
     rm -rf "$buildDir";
-    apt-mark auto '.*' > /dev/null;
-    [ -z "$saveAptManual" ] || apt-mark manual $saveAptManual > /dev/null;
-    find "$TOMCAT_NATIVE_LIBDIR" -type f -executable -exec ldd '{}' ';' \
-        | awk '/=>/ { print $(NF-1) }' \
-        | xargs -rt readlink -e \
-        | sort -u \
-        | xargs -rt dpkg-query --search \
-        | cut -d: -f1 \
-        | sort -u \
-        | tee "$TOMCAT_NATIVE_LIBDIR/.dependencies.txt" \
-        | xargs -r apt-mark manual;
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false;
+    echo "Removing build dependencies for Tomcat Native";
+    apt-mark auto '.*' >/dev/null 2>&1;
+    [[ -z "$saveAptManual" ]] || apt-mark manual $saveAptManual >/dev/null;
+    (
+        find "$TOMCAT_NATIVE_LIBDIR" -type f -executable -exec ldd '{}' ';' \
+        | awk '/=>/ { print $(NF-1) }' | xargs -rt readlink -e | sort -u | xargs -rt dpkg-query --search \
+        | cut -d: -f1 | sort -u | tee "$TOMCAT_NATIVE_LIBDIR/.dependencies.txt" | xargs -r apt-mark manual
+    ) >/dev/null 2>&1;
+    apt-get -qq purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false >/dev/null 2>&1;
     rm -rf /var/lib/apt/lists/*;
+    echo "Finished building Tomcat Native Library";
 EOD
     
 # Ensure Tomcat Starts
-RUN <<-EOD
-    #!/usr/bin/env bash
+RUN <<"EOD" bash
     set -eu;
+    echo "Validating Tomcat configuration";
     TOMCAT_TEST=$(ociectl --test);
     if [[ ! -z "$TOMCAT_TEST" ]];then
-        echo "Validation for Tomcat: FAILED";
+        echo "Validation: FAILED";
         echo "$TOMCAT_TEST";
         exit 1;
     else
-        echo "Validation for Tomcat: SUCCESS";
+        echo "Validation: SUCCESS";
     fi;
 EOD
     
