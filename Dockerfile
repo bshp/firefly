@@ -32,65 +32,62 @@ ENV TOMCAT_VERSION=$TOMCAT_VERSION
 ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
     
+SHELL ["/bin/bash", "-c"]
 # Initial Setup for httpd, tomcat, and java
-RUN set -eu; \
+RUN <<-EOD
+    #!/usr/bin/env bash
+    set -eu;
+    useradd -m -u 1080 tomcat;
     TOMCAT_LATEST=$(wget --quiet --no-cookies https://raw.githubusercontent.com/docker-library/tomcat/master/versions.json -O - \
-            | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. \
-            | with_entries(select(.key | startswith($TOMCAT_VERSION))) \
-            | .[].version'); \
-    wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz; \
-    tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME}; \
-    if [ ${TOMCAT_VERSION} -le 9 ];then \
-        if [ ${JAVA_VERSION} -ne 0 ];then \
-            JAVA_VERSION=${JAVA_VERSION}; \
-        else \
-            JAVA_VERSION=11; \
-        fi \
-    else \
-        JAVA_VERSION=17; \
-    fi; \
-    wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz; \
-    tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME}; \
-    rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*; \
-    # Ensure apache2 can start
-    apache2Test=$(apachectl configtest 2>&1); \
-    apache2Starts=$(echo "$apache2Test" | grep 'Syntax OK'); \
-    if [ -z "$apache2Starts" ];then \
-        echo "Apache2 config test failed: $apache2Test"; \
-        exit 1; \
-    fi; \
-    if [ ${TOMCAT_VERSION} -lt 9 ];then \
-        echo "Tomcat ${TOMCAT_LATEST} will reach end of life on 31 March 2024, bugs and security vulnerabilities will no longer be addressed"; \
-        echo "Consider changing your tag to v9.11 or v10.17"; \
-    fi; \
+        | jq -r --arg TOMCAT_VERSION "${TOMCAT_VERSION}" '. | with_entries(select(.key | startswith($TOMCAT_VERSION))) | .[].version');
+    # Get Tomcat Distribution
+    wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz;
+    tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME};
+    # Get Java Distribution
+    if [[ "${JAVA_VERSION}" -eq 0 ]];then
+        if [[ "${TOMCAT_VERSION}" -le 9 ]];then
+            JAVA_VERSION=11;
+        else
+            JAVA_VERSION=17;
+        fi;
+    fi;
+    wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz;
+    tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME};
+    rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*;
+    # Tomcat EOL Notice
+    if [ ${TOMCAT_VERSION} -lt 9 ];then
+        echo "Tomcat ${TOMCAT_LATEST} will reach end of life on 31 March 2024, bugs and security vulnerabilities will no longer be addressed";
+        echo "Consider changing your tag to v9.11 or v10.17";
+    fi;
+    # Adjust permissions
+    chown -R root:tomcat $CATALINA_HOME;
+    chmod -R 0775 $CATALINA_HOME;
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
-
+EOD
+    
 # Build Tomcat Native Library
-RUN set -eu; \
-    echo "Attempting to build Tomcat Native Library"; \
-    saveAptManual="$(apt-mark showmanual)"; \
-    buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make'; \
-    buildDir="$(mktemp -d)"; \
-    tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1; \
-    apt-get update && apt-get install -y --no-install-recommends $buildDeps; \
-    ( \
-        cd "$buildDir/native"; \
-        osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
-        aprConfig="$(command -v apr-1-config)"; \
-        ./configure \
-            --build="$osArch" \
-            --libdir="${TOMCAT_NATIVE_LIBDIR}" \
-            --prefix="${CATALINA_HOME}" \
-            --with-apr="${aprConfig}" \
-            --with-java-home="${JAVA_HOME}" \
-            "$([ ${TOMCAT_VERSION} -le 9 ] && echo '--with-ssl' || echo '')"; \
-        nproc="$(nproc)"; \
-        make -j "$nproc"; \
-        make install; \
-    ); \
-    rm -rf "$buildDir"; \
-    apt-mark auto '.*' > /dev/null; \
-    [ -z "$saveAptManual" ] || apt-mark manual $saveAptManual > /dev/null; \
+RUN <<-EOD
+    #!/usr/bin/env bash
+    set -eu;
+    echo "Attempting to build Tomcat Native Library";
+    saveAptManual="$(apt-mark showmanual)";
+    buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make';
+    buildDir="$(mktemp -d)";
+    tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1;
+    apt-get update && apt-get install -y --no-install-recommends $buildDeps;
+    (
+        cd "$buildDir/native";
+        osArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)";
+        aprConfig="$(command -v apr-1-config)";
+        ./configure --build="$osArch" --libdir="${TOMCAT_NATIVE_LIBDIR}" --prefix="${CATALINA_HOME}" --with-apr="${aprConfig}" \
+            --with-java-home="${JAVA_HOME}" "$([ ${TOMCAT_VERSION} -le 9 ] && echo '--with-ssl' || echo '')";
+        nproc="$(nproc)";
+        make -j "$nproc";
+        make install;
+    );
+    rm -rf "$buildDir";
+    apt-mark auto '.*' > /dev/null;
+    [ -z "$saveAptManual" ] || apt-mark manual $saveAptManual > /dev/null;
     find "$TOMCAT_NATIVE_LIBDIR" -type f -executable -exec ldd '{}' ';' \
         | awk '/=>/ { print $(NF-1) }' \
         | xargs -rt readlink -e \
@@ -99,24 +96,27 @@ RUN set -eu; \
         | cut -d: -f1 \
         | sort -u \
         | tee "$TOMCAT_NATIVE_LIBDIR/.dependencies.txt" \
-        | xargs -r apt-mark manual; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
-    rm -rf /var/lib/apt/lists/*; \
-    tomcatTest="$(/opt/tomcat/bin/catalina.sh configtest  2>&1)"; \
-    tomcatNative="$(echo "$tomcatTest" | grep 'Apache Tomcat Native')"; \
-    tomcatNative="$(echo "$tomcatNative" | sort -u)"; \
-    if ! echo "$tomcatNative" | grep -E 'INFO: Loaded( APR based)? Apache Tomcat Native library' >&2; then \
-        echo >&2 "$tomcatTest"; \
-        exit 1; \
+        | xargs -r apt-mark manual;
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false;
+    rm -rf /var/lib/apt/lists/*;
+EOD
+    
+# Ensure Tomcat Starts
+RUN <<-EOD
+    #!/usr/bin/env bash
+    set -eu;
+    TOMCAT_TEST=$(ociectl --test);
+    if [[ ! -z "$TOMCAT_TEST" ]];then
+        echo "Validation for Tomcat: FAILED";
+        echo "$TOMCAT_TEST";
+        exit 1;
+    else
+        echo "Validation for Tomcat: SUCCESS";
     fi;
+EOD
     
 # Scripts and Configs
 COPY --chown=root:root --chmod=755 ./src/ ./
-    
-RUN set -eu; \
-    useradd -m -u 1080 tomcat; \
-    chown -R root:tomcat $CATALINA_HOME; \
-    chmod -R 0775 $CATALINA_HOME;
     
 EXPOSE 80 443
     
