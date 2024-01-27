@@ -1,5 +1,5 @@
-# bshp/apache2:version_tag, e.g 22.04 unquoted
-ARG VERSION
+# bshp/ocie:version_tag, e.g 22.04 unquoted
+ARG OCIE_VERSION
     
 # Tomcat/Java
 ARG TOMCAT_VERSION
@@ -8,7 +8,7 @@ ARG JAVA_VERSION=0
 # Optional: Change Timezone
 ARG TZ=America/North_Dakota/Center
     
-FROM bshp/apache2:${VERSION}
+FROM bshp/apache2:${OCIE_VERSION}
     
 LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
 LABEL org.opencontainers.image.source="https://github.com/bshp/firefly"
@@ -72,7 +72,7 @@ RUN <<"EOD" bash
     buildDeps='dpkg-dev gcc libapr1-dev libssl-dev make';
     buildDir="$(mktemp -d)";
     tar -xf ${CATALINA_HOME}/bin/tomcat-native.tar.gz -C "$buildDir" --strip-components=1;
-    echo "Installing build dependencies for Tomcat Native";
+    echo "Gathering build dependencies";
     apt-get -qq update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends $buildDeps >/dev/null 2>&1;
     (
         cd "$buildDir/native";
@@ -85,7 +85,8 @@ RUN <<"EOD" bash
         make install;
     ) >/dev/null 2>&1;
     rm -rf "$buildDir";
-    echo "Removing build dependencies for Tomcat Native";
+    echo "Finished building Tomcat Native Library";
+    echo "Removing build dependencies";
     apt-mark auto '.*' >/dev/null 2>&1;
     [[ -z "$saveAptManual" ]] || apt-mark manual $saveAptManual >/dev/null;
     (
