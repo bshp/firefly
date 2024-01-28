@@ -118,4 +118,4 @@ COPY --chown=root:root --chmod=755 ./src/ ./
     
 EXPOSE 80 443
     
-ENTRYPOINT ["/usr/local/bin/ociectl", "--run"]
+ENTRYPOINT ["/bin/bash"]

@@ -21,17 +21,17 @@ function app_start()
     
 function app_certs()
 {
-    ${OCIE_HOME}/scripts/cacerts;
+    ${OCIE_LIB}/cacerts;
 }
     
 function app_config()
 {
-    ${OCIE_HOME}/scripts/config;
+    ${OCIE_LIB}/config;
 }
     
 function app_update()
 {
-    ${OCIE_HOME}/scripts/update;
+    ${OCIE_LIB}/update;
 }
     
 function app_test()
