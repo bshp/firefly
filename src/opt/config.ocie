@@ -26,8 +26,8 @@ function app_certs()
     
 function app_config()
 {
-    ${OCIE_LIB}/include/apache;
-    ${OCIE_LIB}/include/tomcat;
+    ${OCIE_LIB}/include/config/apache;
+    ${OCIE_LIB}/include/config/tomcat;
 }
     
 function app_update()
