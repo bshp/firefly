@@ -99,6 +99,9 @@ RUN <<"EOD" bash
     echo "Finished building Tomcat Native Library";
 EOD
     
+# Ocie Config, must be added before test but before tomcat configs or else it will fail
+COPY --chown=root:root --chmod=755 ./src/opt/config.ocie ./opt/config.ocie
+    
 # Ensure Tomcat Starts
 RUN <<"EOD" bash
     set -eu;
@@ -113,8 +116,8 @@ RUN <<"EOD" bash
     fi;
 EOD
     
-# Scripts and Configs
-COPY --chown=root:root --chmod=755 ./src/ ./
+# Tomcat Config
+COPY --chown=root:root --chmod=755 ./src/opt/tomcat/ ./opt/tomcat/
     
 EXPOSE 80 443
     
