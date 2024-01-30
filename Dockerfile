@@ -99,17 +99,15 @@ RUN <<"EOD" bash
     echo "Finished building Tomcat Native Library";
 EOD
     
-# Ocie Config, must be added before test but before tomcat configs or else it will fail
-COPY --chown=root:root --chmod=755 ./src/opt/config.ocie ./opt/config.ocie
-    
 # Ensure Tomcat Starts
 RUN <<"EOD" bash
     set -eu;
     echo "Validating Tomcat configuration";
-    TOMCAT_TEST=$(ociectl --test);
-    if [[ ! -z "$TOMCAT_TEST" ]];then
+    CFG_TEST="$(echo "$(/opt/tomcat/bin/catalina.sh configtest  2>&1)" | grep 'Apache Tomcat Native' | sort -u)";
+    CFG_RESULT=$(echo "$CFG_TEST" | grep -E "INFO: Loaded( APR based)? Apache Tomcat Native library");
+    if [[ -z "$CFG_RESULT" ]];then
         echo "Validation: FAILED";
-        echo "$TOMCAT_TEST";
+        echo "$CFG_RESULT";
         exit 1;
     else
         echo "Validation: SUCCESS";
@@ -117,7 +115,7 @@ RUN <<"EOD" bash
 EOD
     
 # Tomcat Config
-COPY --chown=root:root --chmod=755 ./src/opt/tomcat/ ./opt/tomcat/
+COPY --chown=root:root --chmod=755 ./src/ ./
     
 EXPOSE 80 443
     
