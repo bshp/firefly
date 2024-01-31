@@ -16,29 +16,8 @@ tomcat - https://dlcdn.apache.org/tomcat
 ````
 ## Environment Variables:
     
-see [Base Image](https://github.com/bshp/apache2/blob/master/Dockerfile) for more variables
+see [Ocie Environment](https://github.com/bshp/ocie/blob/main/Environment.md) for more info
     
-#### Required:    
-````
-APP_NAME = name of the app, e.g myapp.war would be myapp
-APP_UPDATE_PATH = Path to where the app war is located, without the trailing slash, e.g /opt/updates
-````
-    
-#### Optional:    
-````
-APP_DATA = the path of where the application can store data, e.g /opt/myapp, default: /etc/${APP_NAME}
-APP_PARAMS = additional params to append to JAVA_OPTS, e.g -Dmyapp.setting=something
-CA_FILTER = the filter for certificate import, e.g "*_CA.crt"
-CA_PATH = URL or PATH to where CA Certificates can be found, prefixed with file: or url: , e.g url:https://www.example.com/ or file:/opt/certs
-CA_AUTO_UPDATE = 1 (Import CERT_PATH certs into the OS and Java stores)
-CERT_UPDATE_KEYS = 0 to not update, 1 to force update
-CERT_SUBJECT = the subject for the server ssl keys, e.g "localhost"
-VADC_IP_ADDRESS = address of load balancer, space seperated, e.g 192.168.100.105 192.168.0.105, default: any
-VADC_IP_HEADER = client ip header name, e.g X-Client-IP , default: X-Forwarded-For
-````
-    
-#### Note:    
-Some need to be set for certain functions when used direct with app-run, see [Base Scripts](https://github.com/bshp/apache2/tree/master/src/usr/local/bin) for more info    
 #### Direct:  
 ````
 docker run \
