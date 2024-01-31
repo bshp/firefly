@@ -30,6 +30,11 @@ function app_config()
     ${OCIE_LIB}/include/config/tomcat;
 }
     
+function app_keys()
+{
+    ${OCIE_LIB}/keys;
+}
+    
 function app_update()
 {
     ${OCIE_LIB}/update;

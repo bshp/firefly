@@ -28,6 +28,12 @@
                 showReport="false" 
                 showServerInfo="false" />
             
+            <Valve className="org.apache.catalina.valves.RemoteIpValve" 
+                protocolHeader="x-forwarded-proto" 
+                requestAttributesEnabled="true" 
+                remoteIpHeader="${VADC_IP_HEADER:default-value}" 
+                internalProxies="${VADC_IP_REG}" />
+            
       </Host>
     </Engine>
   </Service>

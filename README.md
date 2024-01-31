@@ -43,17 +43,18 @@ Some need to be set for certain functions when used direct with app-run, see [Ba
 ````
 docker run \
     -e APP_PARAMS=-Xmx2048m \
-    -e CA_AUTO_UPDATE=1 \
+    -e CA_UPDATE_AUTO=1 \
     -e CA_PATH=url:https://cert.example.com/ \
     -e CA_FILTER="*_CA.crt" \
     -e CERT_SUBJECT="localhost" \
     -e APP_NAME=myapp \
     -e APP_DATA=/etc/myapp \
+    -e APP_UPDATE=1 \
     -e APP_UPDATE_PATH=/opt/updates \
     -e APP_UPDATE_AUTO=1 \
+    -e REWRITE_ENABLED=1 \
     -e REWRITE_CORS=0 \
     -e REWRITE_DEFAULT=1 \
-    -e REWRITE_SKIP=0 \
     -e VADC_IP_ADDRESS=192.168.100.10 \
     -e VADC_IP_HEADER=X-VADC-Client \
     -d bshp/firefly:v10.17
