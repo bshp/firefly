@@ -35,9 +35,9 @@ function app_keys()
     ${OCIE_LIB}/keys;
 }
     
-function app_update()
+function app_deploy()
 {
-    ${OCIE_LIB}/update;
+    ${OCIE_LIB}/deploy;
 }
     
 function app_test()
