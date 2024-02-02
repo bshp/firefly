@@ -5,16 +5,8 @@ ARG OCIE_VERSION
 ARG TOMCAT_VERSION
 ARG JAVA_VERSION=0
     
-# Optional: Change Timezone
-ARG TZ=America/North_Dakota/Center
-    
 FROM bshp/apache2:${OCIE_VERSION}
     
-LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
-LABEL org.opencontainers.image.source="https://github.com/bshp/firefly"
-LABEL org.opencontainers.image.title="Firefly"
-    
-ARG TZ
 ARG TOMCAT_VERSION
 ARG JAVA_VERSION
     
