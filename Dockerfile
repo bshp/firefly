@@ -112,7 +112,7 @@ RUN <<"EOD" bash
     echo "Validating Tomcat configuration";
     CFG_TEST="$(echo "$(/opt/tomcat/bin/catalina.sh configtest  2>&1)" | grep 'Apache Tomcat Native' | sort -u)";
     CFG_RESULT=$(echo "$CFG_TEST" | grep -E "INFO: Loaded( APR based)? Apache Tomcat Native library");
-    if [[ -z "$CFG_RESULT" ]];then
+    if [[ ! -z "$CFG_RESULT" ]];then
         echo "Validation: FAILED";
         echo "$CFG_RESULT";
         exit 1;
