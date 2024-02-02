@@ -18,11 +18,9 @@ jobs:
       run: |
         docker push bshp/firefly:v9.8
     - name: Build v9.11
-      run: docker build . --pull --tag bshp/firefly:latest --build-arg OCIE_VERSION=22.04 --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=11 --no-cache
+      run: docker build . --pull --tag bshp/firefly:v9.11 --build-arg OCIE_VERSION=22.04 --build-arg TOMCAT_VERSION=9 --build-arg JAVA_VERSION=11 --no-cache
     - name: Push v9.11
       run: |
-        docker tag bshp/firefly:latest bshp/firefly:v9.11
-        docker push bshp/firefly:latest
         docker push bshp/firefly:v9.11
     - name: Build v10.17
       run: docker build . --pull --tag bshp/firefly:v10.17 --build-arg OCIE_VERSION=22.04 --build-arg TOMCAT_VERSION=10 --build-arg JAVA_VERSION=17 --no-cache
@@ -30,7 +28,9 @@ jobs:
       run: |
         docker push bshp/firefly:v10.17
     - name: Build v10.21
-      run: docker build . --pull --tag bshp/firefly:v10.21 --build-arg OCIE_VERSION=22.04 --build-arg TOMCAT_VERSION=10 --build-arg JAVA_VERSION=21 --no-cache
+      run: docker build . --pull --tag bshp/firefly:latest --build-arg OCIE_VERSION=22.04 --build-arg TOMCAT_VERSION=10 --build-arg JAVA_VERSION=21 --no-cache
     - name: Push v10.21
       run: |
+        docker tag bshp/firefly:latest bshp/firefly:v10.21
+        docker push bshp/firefly:latest
         docker push bshp/firefly:v10.21

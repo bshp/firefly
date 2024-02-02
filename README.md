@@ -22,15 +22,17 @@ see [Ocie Environment](https://github.com/bshp/ocie/blob/main/Environment.md) fo
 ````
 docker run \
     -e APP_PARAMS=-Xmx2048m \
+    -e CA_ENABLED=1 \
     -e CA_UPDATE_AUTO=1 \
     -e CA_PATH=url:https://cert.example.com/ \
     -e CA_FILTER="*_CA.crt" \
+    -e CERT_ENABLED=1 \
     -e CERT_SUBJECT="localhost" \
+    -e APP_DEPLOY=1 \
     -e APP_NAME=myapp \
     -e APP_DATA=/etc/myapp \
     -e APP_UPDATE=1 \
     -e APP_UPDATE_PATH=/opt/updates \
-    -e APP_UPDATE_AUTO=1 \
     -e REWRITE_ENABLED=1 \
     -e REWRITE_CORS=0 \
     -e REWRITE_DEFAULT=1 \
@@ -50,9 +52,10 @@ su tomcat -c "${CATALINA_HOME}/bin/catalina.sh run";
     
 ## Tags:
     
-latest = v9.11    
+latest = v10.21    
 v9.11 = Tomcat 9 with Corretto JDK 11    
 v10.17 = Tomcat 10 with Corretto JDK 17    
+v10.21 = Tomcat 10 with Corretto JDK 21    
     
 ## Build:  
 ````

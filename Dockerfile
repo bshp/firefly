@@ -3,19 +3,23 @@ ARG OCIE_VERSION
     
 # Tomcat/Java
 ARG TOMCAT_VERSION
-ARG JAVA_VERSION=0
+ARG JAVA_VERSION
     
 FROM bshp/apache2:${OCIE_VERSION}
     
 ARG TOMCAT_VERSION
 ARG JAVA_VERSION
     
-ENV OCIE_CONFIG=/opt \
-    JAVA_HOME=/opt/java \
+#Tomcat specific
+ENV JAVA_HOME=/opt/java \
     CATALINA_HOME=/opt/tomcat \
     PATH=$PATH:/opt/tomcat/bin:/opt/java/bin \
-    TOMCAT_VERSION=${TOMCAT_VERSION} \
+    LD_LIBRARY_PATH=/opt/tomcat/native-jni-lib \
     TOMCAT_NATIVE_LIBDIR=/opt/tomcat/native-jni-lib \
+    TOMCAT_VERSION=${TOMCAT_VERSION}
+    
+#Ocie
+ENV OCIE_CONFIG=/opt \
     APP_DEPLOY=1 \
     APP_TYPE="tomcat" \
     APP_GROUP="tomcat" \
@@ -30,8 +34,6 @@ ENV OCIE_CONFIG=/opt \
     REWRITE_CORS=0 \
     REWRITE_DEFAULT=1
     
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}${TOMCAT_NATIVE_LIBDIR}
-    
 # Initial Setup for httpd, tomcat, and java
 RUN <<"EOD" bash
     set -eu;
@@ -41,23 +43,10 @@ RUN <<"EOD" bash
     echo "Getting Tomcat Distribution, Version: ${TOMCAT_LATEST}";
     wget --quiet --no-cookies https://dlcdn.apache.org/tomcat/tomcat-${TOMCAT_VERSION}/v${TOMCAT_LATEST}/bin/apache-tomcat-${TOMCAT_LATEST}.tar.gz -O /opt/tomcat.tgz;
     tar xzf /opt/tomcat.tgz -C /opt && mv /opt/apache-tomcat-${TOMCAT_LATEST} ${CATALINA_HOME};
-    if [[ ${JAVA_VERSION} -eq 0 ]];then
-        echo "OpenJDK build-arg was omitted";
-        if [[ ${TOMCAT_VERSION} -le 9 ]];then
-            JAVA_VERSION=11;
-        else
-            JAVA_VERSION=17;
-        fi;
-    fi;
     echo "Getting OpenJDK Distribution, Version: ${JAVA_VERSION}.x";
     wget --quiet --no-cookies https://corretto.aws/downloads/latest/amazon-corretto-${JAVA_VERSION}-x64-linux-jdk.tar.gz -O /opt/java.tgz;
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME};
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*;
-    # Tomcat EOL Notice
-    if [ ${TOMCAT_VERSION} -lt 9 ];then
-        echo "Tomcat ${TOMCAT_LATEST} will reach end of life on 31 March 2024, bugs and security vulnerabilities will no longer be addressed";
-        echo "Consider changing your tag to v9.11 or v10.17";
-    fi;
     # Adjust permissions
     chown -R ${APP_OWNER}:${APP_GROUP} $CATALINA_HOME;
     chmod -R 0775 $CATALINA_HOME;
