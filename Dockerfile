@@ -19,12 +19,16 @@ ARG TOMCAT_VERSION
 ARG JAVA_VERSION
     
 ENV OCIE_CONFIG=/opt \
-    TOMCAT_VERSION=$TOMCAT_VERSION \
+    JAVA_HOME=/opt/java \
+    CATALINA_HOME=/opt/tomcat \
+    PATH=$PATH:/opt/tomcat/bin:/opt/java/bin \
+    TOMCAT_VERSION=${TOMCAT_VERSION} \
+    TOMCAT_NATIVE_LIBDIR=/opt/tomcat/native-jni-lib \
     APP_DEPLOY=1 \
     APP_TYPE="tomcat" \
     APP_GROUP="tomcat" \
     APP_OWNER="root" \
-    APP_HOME=$CATALINA_HOME/webapps \
+    APP_HOME=/opt/tomcat/webapps \
     APP_DATA=/etc \
     CA_ENABLED=1 \
     CA_UPDATE_AUTO=1 \
@@ -33,11 +37,8 @@ ENV OCIE_CONFIG=/opt \
     REWRITE_ENABLED=1 \
     REWRITE_CORS=0 \
     REWRITE_DEFAULT=1
-ENV JAVA_HOME=/opt/java \
-    CATALINA_HOME=/opt/tomcat
-ENV PATH=$PATH:$CATALINA_HOME/bin:$JAVA_HOME/bin
-ENV TOMCAT_NATIVE_LIBDIR=$CATALINA_HOME/native-jni-lib
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
+    
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}${TOMCAT_NATIVE_LIBDIR}
     
 # Initial Setup for httpd, tomcat, and java
 RUN <<"EOD" bash
