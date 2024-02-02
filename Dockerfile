@@ -29,7 +29,7 @@ ENV OCIE_CONFIG=/opt
 ENV APP_DEPLOY=1
 ENV APP_TYPE="tomcat"
 ENV APP_GROUP="tomcat"
-ENV APP_OWNER="tomcat"
+ENV APP_OWNER="root"
 ENV APP_HOME=$CATALINA_HOME/webapps
 ENV APP_DATA=/etc
 ENV CA_ENABLED=1
@@ -67,7 +67,7 @@ RUN <<"EOD" bash
         echo "Consider changing your tag to v9.11 or v10.17";
     fi;
     # Adjust permissions
-    chown -R tomcat:tomcat $CATALINA_HOME;
+    chown -R ${APP_OWNER}:${APP_GROUP} $CATALINA_HOME;
     chmod -R 0775 $CATALINA_HOME;
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
 EOD
