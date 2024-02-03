@@ -43,7 +43,7 @@ docker run \
 #### Custom:  
 Add at end of your entrypoint script either of:  
 ````
-/usr/local/bin/ociectl --run;
+/usr/sbin/ociectl --run;
 ````
 ````
 /usr/sbin/apachectl -k start;
