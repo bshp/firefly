@@ -16,7 +16,7 @@ function app_reload()
 function app_start()
 {
    /usr/sbin/apachectl -k start;
-   su ${APP_OWNER} -c "${CATALINA_HOME}/bin/catalina.sh run";
+   su ${APP_OWNER} -c "${CATALINA_HOME}/bin/catalina.sh start";
 }
     
 function app_certs()
