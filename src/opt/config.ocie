@@ -3,7 +3,7 @@
 function app_shutdown()
 {
     /usr/sbin/apachectl -k stop;
-    ${CATALINA_HOME}/bin/catalina.sh stop;
+    ${CATALINA_HOME}/bin/catalina.sh stop 15 >/dev/null 2>&1;
 }
     
 function app_reload()
@@ -16,7 +16,10 @@ function app_reload()
 function app_start()
 {
    /usr/sbin/apachectl -k start;
-   su ${APP_OWNER} -c "${CATALINA_HOME}/bin/catalina.sh run";
+   su ${RUNAS} -c "${CATALINA_HOME}/bin/catalina.sh start >/dev/null";
+   #Give tomcat a few seconds to create java PID
+   sleep 5;
+   echo "$(cat ${CATALINA_PID})";
 }
     
 function app_certs()

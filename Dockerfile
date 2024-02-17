@@ -12,7 +12,10 @@ ARG JAVA_VERSION
     
 #Tomcat specific
 ENV JAVA_HOME=/opt/java \
+    CATALINA_BASE=/opt/tomcat \
     CATALINA_HOME=/opt/tomcat \
+    CATALINA_RUN=/var/run/tomcat \
+    CATALINA_PID=/var/run/tomcat/catalina.pid \
     PATH=$PATH:/opt/tomcat/bin:/opt/java/bin \
     LD_LIBRARY_PATH=/opt/tomcat/native-jni-lib \
     TOMCAT_NATIVE_LIBDIR=/opt/tomcat/native-jni-lib \
@@ -48,6 +51,7 @@ RUN <<"EOD" bash
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME};
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*;
     # Adjust permissions
+    install -d -m 0755 -o ${APP_OWNER} -g ${APP_GROUP} ${CATALINA_RUN};
     chown -R ${APP_OWNER}:${APP_GROUP} $CATALINA_HOME;
     chmod -R 0775 $CATALINA_HOME;
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
