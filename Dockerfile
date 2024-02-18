@@ -51,7 +51,7 @@ RUN <<"EOD" bash
     tar xzf /opt/java.tgz -C /opt && mv /opt/amazon-corretto-* ${JAVA_HOME};
     rm /opt/java.tgz && rm /opt/tomcat.tgz && rm -rf /opt/tomcat/webapps/*;
     # Adjust permissions
-    install -d -m 0755 -o ${APP_OWNER} -g ${APP_GROUP} ${CATALINA_RUN};
+    install -d -m 0775 -o ${APP_OWNER} -g ${APP_GROUP} ${CATALINA_RUN};
     chown -R ${APP_OWNER}:${APP_GROUP} $CATALINA_HOME;
     chmod -R 0775 $CATALINA_HOME;
     echo "Installed Tomcat Version: ${TOMCAT_LATEST} and OpenJDK Version: amazon-corretto-${JAVA_VERSION}-x64";
