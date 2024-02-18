@@ -108,7 +108,7 @@ RUN <<"EOD" bash
 EOD
     
 # Tomcat Config
-COPY --chown=root:root --chmod=755 ./src/ ./
+COPY --chown=root:tomcat --chmod=775 ./src/ ./
     
 EXPOSE 80 443
     
