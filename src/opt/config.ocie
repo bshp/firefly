@@ -31,7 +31,7 @@ function app_certs()
     
 function app_config()
 {
-    ${OCIE_LIB}/include/config/tomcat;
+    ${OCIE_LIB}/include/tomcat;
 }
     
 function app_keys()
