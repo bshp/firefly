@@ -15,11 +15,13 @@ function app_reload()
     
 function app_start()
 {
-   /usr/sbin/apachectl -k start;
-   su ${RUNAS} -c "${CATALINA_HOME}/bin/catalina.sh start >/dev/null";
-   #Give tomcat a few seconds to create java PID
-   sleep 5;
-   echo "$(cat ${CATALINA_PID})";
+    /usr/sbin/apachectl -k start;
+    (
+     su tomcat -c "${CATALINA_HOME}/bin/catalina.sh start";
+    ) >/dev/null 2>&1;
+    #Give tomcat a few seconds to create the java PID
+    sleep 5;
+    echo "$(cat ${CATALINA_PID})";
 }
     
 function app_certs()
